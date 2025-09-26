@@ -1,0 +1,286 @@
+using Crockhead.Core;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+
+namespace Crockhead.Table
+{
+	/// <summary>
+	/// 제너릭 테이블.
+	/// <para>기록 객체를 보관하는 컬렉션.</para>
+	/// <para>모든 레코드는 동일 컬렉션안에서 정수형 고유식별자를 들고 있으며 해당 레코드의 고유식별자를 키로 사용.</para>
+	/// <para>ITable 인터페이스 구현체.</para>
+	/// </summary>
+	public class Table<TRecordable> : Disposable, ITable<TRecordable>, IEnumerable<TRecordable> where TRecordable : IRecordable
+	{
+		/// <summary>
+		/// 레코드 목록.
+		/// </summary>
+		private SortedDictionary<int, TRecordable> m_Records;
+
+		/// <summary>
+		/// 갯수 프로퍼티.
+		/// </summary>
+		public int Count => m_Records.Count;
+
+		/// <summary>
+		/// 생성됨.
+		/// </summary>
+		public Table(IEnumerable<TRecordable> records = null) : base()
+		{
+			m_Records = new SortedDictionary<int, TRecordable>();
+			AddRange(records);
+		}
+
+		/// <summary>
+		/// 해제됨.
+		/// </summary>
+		protected override void OnDispose(bool explicitDisposing)
+		{
+		}
+
+		/// <summary>
+		/// 모든 레코드 제거.
+		/// </summary>
+		public void Clear()
+		{
+			m_Records.Clear();
+		}
+
+		/// <summary>
+		/// 레코드 추가.
+		/// <para>고유식별자가 기존에 있는 경우는 교체.</para>
+		/// </summary>
+		public void Add(TRecordable record)
+		{
+			if (record == null)
+				return;
+
+			m_Records[record.Id] = record;
+		}
+
+		/// <summary>
+		/// 레코드 범위 추가.
+		/// <para>고유식별자가 기존에 있는 경우는 교체.</para>
+		/// </summary>
+		public void AddRange(IEnumerable<TRecordable> records)
+		{
+			if (records == null)
+				return;
+
+			foreach (var record in records)
+			{
+				Add(record);
+			}
+		}
+
+		/// <summary>
+		/// 레코드 제거.
+		/// </summary>
+		public bool Remove(int id)
+		{
+			return m_Records.Remove(id);
+		}
+
+		/// <summary>
+		/// 레코드 포함 여부 반환.
+		/// </summary>
+		public bool Contains(int id)
+		{
+			return m_Records.ContainsKey(id);
+		}
+
+		/// <summary>
+		/// 레코드 포함 여부 반환.
+		/// </summary>
+		public bool Contains(Predicate<TRecordable> predicate)
+		{
+			foreach (var record in m_Records.Values)
+			{
+				if (predicate?.Invoke(record) ?? false)
+					return true;
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// 조건에 맞는 레코드 반환.
+		/// </summary>
+		public TRecordable Find(int id)
+		{
+			if (m_Records.TryGetValue(id, out var value))
+				return value;
+
+			return default;
+		}
+
+		/// <summary>
+		/// 조건에 맞는 레코드 반환.
+		/// </summary>
+		public TRecordable Find(Predicate<TRecordable> predicate)
+		{
+			foreach (var record in m_Records.Values)
+			{
+				if (predicate?.Invoke(record) ?? false)
+					return record;
+			}
+			return default;
+		}
+
+		/// <summary>
+		/// 조건에 맞는 모든 레코드 반환.
+		/// </summary>
+		public List<TRecordable> FindAll(Predicate<TRecordable> predicate)
+		{
+			var result = new List < TRecordable >();
+			foreach (var record in m_Records.Values)
+			{
+				if (predicate?.Invoke(record) ?? false)
+					result.Add(record);
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// 모든 레코드 반환.
+		/// </summary>
+		public List<TRecordable> All()
+		{
+			return new List<TRecordable>(m_Records.Values);
+		}
+
+		/// <summary>
+		/// 레코드 추가.
+		/// <para>ITable 인터페이스 구현.</para>
+		/// </summary>
+		void ITable.Add(IRecordable record)
+		{
+			if (record == null)
+				return;
+
+			if (record is TRecordable)
+			{
+				m_Records[record.Id] = (TRecordable)record;
+			}
+			else
+			{
+				var genericType = typeof(TRecordable);
+				throw new InvalidCastException($"[Table] {record} is not {genericType}.");
+			}
+		}
+
+		/// <summary>
+		/// 레코드 범위 추가.
+		/// <para>ITable 인터페이스 구현.</para>
+		/// </summary>
+		void ITable.AddRange(IEnumerable<IRecordable> records)
+		{
+			if (records == null)
+				return;
+
+			foreach (var record in records)
+			{
+				if (record is TRecordable)
+				{
+					m_Records[record.Id] = (TRecordable)record;
+				}
+				else
+				{
+					var genericType = typeof(TRecordable);
+					throw new InvalidCastException($"[Table] {record} is not {genericType}.");
+				}
+			}
+		}
+
+		/// <summary>
+		/// 레코드 포함 여부 반환.
+		/// <para>ITable 인터페이스 구현.</para>
+		/// </summary>
+		bool ITable.Contains(Predicate<IRecordable> predicate)
+		{
+			foreach (var record in m_Records.Values)
+			{
+				if (predicate?.Invoke(record) ?? false)
+					return true;
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// 조건에 맞는 레코드 반환.
+		/// <para>ITable 인터페이스 구현.</para>
+		/// </summary>
+		IRecordable ITable.Find(int id)
+		{
+			return m_Records[id];
+		}
+
+		/// <summary>
+		/// 조건에 맞는 레코드 반환.
+		/// <para>ITable 인터페이스 구현.</para>
+		/// </summary>
+		IRecordable ITable.Find(Predicate<IRecordable> predicate)
+		{
+			foreach (var record in m_Records.Values)
+			{
+				if (predicate?.Invoke(record) ?? false)
+					return record;
+			}
+			return default;
+		}
+
+		/// <summary>
+		/// 조건에 맞는 모든 레코드 반환.
+		/// <para>ITable 인터페이스 구현.</para>
+		/// </summary>
+		List<IRecordable> ITable.FindAll(Predicate<IRecordable> predicate)
+		{
+			var result = new System.Collections.Generic.List<IRecordable>();
+			foreach (var record in m_Records.Values)
+			{
+				if (predicate?.Invoke(record) ?? false)
+					result.Add(record);
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// 모든 레코드 반환.
+		/// <para>ITable 인터페이스 구현.</para>
+		/// </summary>
+		List<IRecordable> ITable.All()
+		{
+			return m_Records.Values.Select(it => (IRecordable)it).ToList();
+		}
+
+		/// <summary>
+		/// 열거 제공자 반환.
+		/// <para>IEnumerable.TRecordable 인터페이스 구현.</para>
+		/// </summary>
+		IEnumerator<TRecordable> IEnumerable<TRecordable>.GetEnumerator()
+		{
+			return m_Records.Values.GetEnumerator();
+		}
+
+		/// <summary>
+		/// 열거 제공자 반환.
+		/// <para>IEnumerable 인터페이스 구현.</para>
+		/// </summary>
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return m_Records.Values.GetEnumerator();
+		}
+
+		/// <summary>
+		/// 생성.
+		/// </summary>
+		public static Table<TRecordable> Create(TRecordable[] records = null)
+		{
+			var obj = Reflections.CreateInstance<Table<TRecordable>>();
+			obj.AddRange(records);
+			return obj;
+		}
+	}
+}

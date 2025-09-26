@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Title>Crockhead.Table</Title>
+		<PackageId>Crockhead.Table</PackageId>
+		<Version>0.0.0</Version>
+		<Authors>ddukbaek2</Authors>
+		<Description></Description>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/ddukbaek2/Crockhead.Table.git</RepositoryUrl>
+		<ProjectUrl>https://github.com/ddukbaek2/Crockhead.Table</ProjectUrl>
+		<LicenseExpression>MIT</LicenseExpression>
+		<PackageTags>core;utility;base;table</PackageTags>
+		<Nullable>disable</Nullable>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	  <PackageReference Include="Crockhead.Core" Version="0.0.8" />
+	  <PackageReference Include="ExcelDataReader" Version="3.8.0" />
+	  <PackageReference Include="ExcelDataReader.DataSet" Version="3.8.0" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	</ItemGroup>
+</Project>
