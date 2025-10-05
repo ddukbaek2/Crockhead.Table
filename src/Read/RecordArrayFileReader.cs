@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 
 
-namespace Crockhead.Table.src.Read
+namespace Crockhead.Table
 {
 	/// <summary>
 	/// 레코드 배열 파일 리더.
@@ -30,10 +30,32 @@ namespace Crockhead.Table.src.Read
 		/// <summary>
 		/// 생성됨.
 		/// </summary>
+		public RecordArrayFileReader(object sharedTableInstance) : base()
+		{
+			if (sharedTableInstance == null)
+				throw new ArgumentNullException(nameof(sharedTableInstance));
+
+			var sharedTableType = sharedTableInstance.GetType();
+			if (!Reflections.TryGetAttribute<FilePathAttribute>(sharedTableType, out var filePathAttribute))
+				throw new ArgumentNullException(nameof(filePathAttribute));
+
+			InternalInitialize(filePathAttribute);
+		}
+
+		/// <summary>
+		/// 생성됨.
+		/// </summary>
+		public RecordArrayFileReader(FilePathAttribute filePathAttribute) : base()
+		{
+			InternalInitialize(filePathAttribute);
+		}
+
+		/// <summary>
+		/// 생성됨.
+		/// </summary>
 		public RecordArrayFileReader(string filePath) : base()
 		{
-			m_FilePath = filePath;
-			m_Records = new List<TRecordable>();
+			InternalInitialize(filePath);
 		}
 
 		/// <summary>
@@ -41,6 +63,35 @@ namespace Crockhead.Table.src.Read
 		/// </summary>
 		protected override void OnDispose(bool explicitDisposing)
 		{
+		}
+
+		/// <summary>
+		/// 초기화.
+		/// </summary>
+		private void InternalInitialize(string filePath)
+		{
+			if (string.IsNullOrWhiteSpace(filePath))
+				throw new ArgumentNullException(nameof(filePath));
+			if (!File.Exists(filePath))
+				throw new FileNotFoundException(nameof(filePath));
+
+			m_FilePath = filePath;
+			m_Records = new List<TRecordable>();
+		}
+
+
+		/// <summary>
+		/// 초기화.
+		/// </summary>
+		private void InternalInitialize(FilePathAttribute filePathAttribute)
+		{
+			if (filePathAttribute == null)
+				throw new ArgumentNullException(nameof(filePathAttribute));
+			if (!filePathAttribute.IsEnabled)
+				throw new InvalidOperationException(nameof(filePathAttribute.IsEnabled));
+
+			var filePath = filePathAttribute.Value;
+			InternalInitialize(filePath);
 		}
 
 		/// <summary>

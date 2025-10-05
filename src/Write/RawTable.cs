@@ -1,7 +1,7 @@
 namespace Crockhead.Table
 {
 	/// <summary>
-	/// 원시 테이블.
+	/// 원시 테이블. (2차원 배열)
 	/// </summary>
 	public class RawTable
 	{

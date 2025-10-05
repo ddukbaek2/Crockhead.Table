@@ -11,7 +11,7 @@ namespace Crockhead.Table
 	/// 공유 테이블.
 	/// </summary>
 	public class SharedTable<TClass, TRecordable, TRecordArrayReader> : SharedClass<TClass>
-		where TClass : SharedTable<TClass, TRecordable, IRecordArrayReader<TRecordable>>, new()
+		where TClass : SharedTable<TClass, TRecordable, TRecordArrayReader>, new()
 		where TRecordable : IRecordable
 		where TRecordArrayReader : IRecordArrayReader<TRecordable>
 	{
@@ -19,6 +19,16 @@ namespace Crockhead.Table
 		/// 컬렉션.
 		/// </summary>
 		private Table<TRecordable> m_Collection;
+
+		/// <summary>
+		/// 테이블 클래스 타입 이름.
+		/// </summary>
+		private string m_TableClassName;
+
+		/// <summary>
+		/// 리더.
+		/// </summary>
+		private TRecordArrayReader m_Reader;
 
 		/// <summary>
 		/// 로거.
@@ -31,28 +41,33 @@ namespace Crockhead.Table
 		public Table<TRecordable> Collection => m_Collection;
 
 		/// <summary>
+		/// 리더 프로퍼티.
+		/// </summary>
+		public TRecordArrayReader Reader => m_Reader;
+
+		/// <summary>
+		/// 로거 프로퍼티.
+		/// </summary>
+		public Logger Logger => m_Logger;
+
+		/// <summary>
 		/// 생성됨.
 		/// </summary>
 		public SharedTable() : base()
 		{
+			var type = typeof(TClass);
 			m_Collection = null;
-			m_Logger = null;
-		}
-
-		/// <summary>
-		/// 로거 설정.
-		/// </summary>
-		public void SetLogger(Logger logger)
-		{
-			m_Logger = logger;
+			m_TableClassName = type.Name;
+			m_Reader = default;
+			m_Logger = new Logger($"{m_TableClassName}_Logger");
 		}
 
 		/// <summary>
 		/// 생성됨.
 		/// </summary>
-		protected override void OnCreate()
+		protected override void OnCreate(params object[] arguments)
 		{
-			Reload();
+			base.OnCreate(arguments);
 		}
 
 		/// <summary>
@@ -70,28 +85,23 @@ namespace Crockhead.Table
 		/// </summary>
 		protected virtual void OnLoad(TRecordArrayReader reader)
 		{
-			//	using var reader = new RecordArrayReader<TRecordable>(jsonAssetPath);
-			//	reader.Read();
-			var tableClassType = typeof(TRecordable);
+			if (reader == null)
+				throw new ArgumentNullException(nameof(reader));
+
 			var operation = reader.Read();
-			//operation.WaitForCompletion();
-			Task.Run(() =>
+			if (operation.IsSucceeded)
 			{
-				operation.WaitForCompletion();
-				if (operation.IsSucceeded)
-				{
-					var records = reader.Records;
-					m_Collection = new Table<TRecordable>(records);
-					m_Collection.AddRange(records);
-					m_Logger?.Log($"[{tableClassType}] Load Complete.");
-					OnLoaded(true);
-				}
-				else
-				{
-					m_Logger?.Log($"[{tableClassType}] Not Found AssetPath Attribute.");
-					OnLoaded(false);
-				}
-			});
+				var records = reader.Records;
+				m_Collection = new Table<TRecordable>(records);
+				m_Collection.AddRange(records);
+				m_Logger?.Log($"[{m_TableClassName}] Load Complete.");
+				OnLoaded(true);
+			}
+			else
+			{
+				m_Logger?.Log($"[{m_TableClassName}] Not Found AssetPath Attribute.");
+				OnLoaded(false);
+			}
 		}
 
 		/// <summary>
@@ -102,11 +112,31 @@ namespace Crockhead.Table
 		}
 
 		/// <summary>
+		/// 리더 설정.
+		/// </summary>
+		public void SetReader(TRecordArrayReader reader)
+		{
+			m_Reader = reader;
+		}
+
+		/// <summary>
 		/// 로드.
 		/// </summary>
-		public void Reload()
+		public void Load(TRecordArrayReader reader)
 		{
-			//OnLoad();
+			if (reader == null)
+				throw new ArgumentNullException(nameof(reader));
+
+			SetReader(reader);
+			OnLoad(Reader);
+		}
+
+		/// <summary>
+		/// 로드.
+		/// </summary>
+		public void Load()
+		{
+			OnLoad(Reader);
 		}
 
 		/// <summary>

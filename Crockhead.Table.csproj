@@ -1,26 +1,58 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
-		<Title>Crockhead.Table</Title>
-		<PackageId>Crockhead.Table</PackageId>
-		<Version>0.0.0</Version>
-		<Authors>ddukbaek2</Authors>
-		<Description></Description>
+		<Version>0.0.1</Version>
 		<TargetFramework>netstandard2.1</TargetFramework>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Nullable>disable</Nullable>
+		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<PackageId>Crockhead.Table</PackageId>
+		<Product>$(PackageId)</Product>
+		<Title>$(PackageId)</Title>
+		<AssemblyName>$(PackageId)</AssemblyName>
+		<Company>Crockhead Studio</Company>
+		<Authors>ddukbaek2</Authors>
+		<Description>Generates C# and JSON files from Custom-Rule-Based XLSX Tables and Provides Functionality to Load These Tables.</Description>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/ddukbaek2/Crockhead.Table.git</RepositoryUrl>
-		<ProjectUrl>https://github.com/ddukbaek2/Crockhead.Table</ProjectUrl>
-		<LicenseExpression>MIT</LicenseExpression>
+		<!-- <PackageLicenseExpression>MIT</PackageLicenseExpression> -->
+		<!-- <LicenseExpression>$(PackageLicenseExpression)</LicenseExpression> -->
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageTags>core;utility;base;table</PackageTags>
-		<Nullable>disable</Nullable>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageProjectUrl>https://github.com/ddukbaek2/Crockhead.Table</PackageProjectUrl>
+		<ProjectUrl>$(PackageProjectUrl)</ProjectUrl>
+		<PackageDirectory>$(MSBuildProjectDirectory)\bin\$(Configuration)\</PackageDirectory>
+		<DeployOnBuild>True</DeployOnBuild>
+		<DistOnPack>True</DistOnPack>
+		<OutputDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\</OutputDir>
+		<LibraryFilePath>$(OutputDir)$(AssemblyName).dll</LibraryFilePath>
+		<DocumentFilePath>$(OutputDir)$(AssemblyName).xml</DocumentFilePath>
 	</PropertyGroup>
+
 	<ItemGroup>
 		<None Include="README.md" Pack="true" PackagePath="\" />
-	  <PackageReference Include="Crockhead.Core" Version="0.0.8" />
-	  <PackageReference Include="ExcelDataReader" Version="3.8.0" />
-	  <PackageReference Include="ExcelDataReader.DataSet" Version="3.8.0" />
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<None Include="LICENSE" Pack="true" PackagePath="\" />
+		<PackageReference Include="Crockhead.Core" Version="0.0.13" />
+		<PackageReference Include="ExcelDataReader" Version="3.8.0" />
+		<PackageReference Include="ExcelDataReader.DataSet" Version="3.8.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
+
+	<Target Name="RemoveAllPackages" BeforeTargets="Build;Pack">
+		<ItemGroup>
+			<PackageFilePattern Include="$(PackageDirectory)*.nupkg" />
+			<SymbolPackageFilePattern Include="$(PackageDirectory)*.snupkg" />
+		</ItemGroup>
+		<Delete Files="@(PackageFilePattern);@(SymbolPackageFilePattern)" />
+	</Target>
+
+	<Target Name="Deployment" AfterTargets="Build" Condition="'$(Configuration)'=='Release' and '$(DeployOnBuild)'=='True'">
+		<Exec Command="deployment.bat $(DocumentFilePath) $(LibraryFilePath)" WorkingDirectory="$(ProjectDir)" />
+	</Target>
+	<Target Name="Distribution" AfterTargets="Pack" Condition="'$(Configuration)'=='Release' and '$(DistOnPack)'=='True'">
+		<Exec Command="distribution.bat" WorkingDirectory="$(ProjectDir)" />
+	</Target>
+
 </Project>
