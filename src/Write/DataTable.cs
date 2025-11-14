@@ -29,6 +29,16 @@ namespace Crockhead.Table
 		public List<string> Types { set; get; }
 
 		/// <summary>
+		/// 주석 목록.
+		/// </summary>
+		public List<string> Comments { set; get; }
+
+		/// <summary>
+		/// 옵션 목록.
+		/// </summary>
+		public List<string> Options { set; get; }
+
+		/// <summary>
 		/// 레코드 목록.
 		/// </summary>
 		public List<List<string>> Records { set; get; }
@@ -42,6 +52,8 @@ namespace Crockhead.Table
 			Name = string.Empty;
 			Fields = new List<string>();
 			Types = new List<string>();
+			Comments = new List<string>();
+			Options = new List<string>();
 			Records = new List<List<string>>();
 		}
 	}

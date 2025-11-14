@@ -20,7 +20,7 @@ namespace Crockhead.Table
 		/// <summary>
 		/// 프로퍼티 목록.
 		/// </summary>
-		public static readonly string[] Properties = new string[] { "field", "type", "option", "comment", "record" };
+		public static readonly string[] Properties = new string[] { "field", "type", "comment", "option", "record" };
 
 		/// <summary>
 		/// 비 문자열 값 타입 목록.
@@ -161,9 +161,14 @@ namespace Crockhead.Table
 						continue;
 
 					var property = columns[0].Trim().ToLower();
-					if (!DataTableWritter.Properties.Contains(property))
+					if (string.IsNullOrWhiteSpace(property))
 					{
-						m_Logger.Log($"[TableGenerator][{rawTable.Name}] {y}행의 맨 앞 첫번째 열에 프로퍼티가 없습니다.");
+						m_Logger.Log($"[TableGenerator][{rawTable.Name}] {y}행의 맨 앞 첫번째 열에 프로퍼티 식별자가 없습니다.");
+						continue;
+					}
+					else if (!DataTableWritter.Properties.Contains(property))
+					{
+						m_Logger.Log($"[TableGenerator][{rawTable.Name}] {y}행의 맨 앞 첫번째 열에 프로퍼티 식별자가 아닌 값이 있습니다.");
 						continue;
 					}
 
@@ -221,6 +226,7 @@ namespace Crockhead.Table
 							}
 							break;
 						}
+
 					case "type":
 						{
 							if (dataTable.Fields.Count == 0)
@@ -244,6 +250,52 @@ namespace Crockhead.Table
 							break;
 						}
 
+					case "comment":
+						{
+							if (dataTable.Comments.Count == 0)
+								throw new Exception($"[TableGenerator][{dataTable.Name}] 코멘트가 필드보다 먼저 선언되었습니다.");
+
+							var columnCount = columns.Length;
+							for (var x = 0; x < columnCount; ++x)
+							{
+								if (!includeFields.Contains(x))
+									continue;
+
+								var column = columns[x];
+								var comment = column;
+								//if (string.IsNullOrWhiteSpace(comment))
+								//{
+								//	m_Logger.Log($"[TableGenerator][{dataTable.Name}] {x}열에 코멘트가 비어있습니다.");
+								//}
+
+								dataTable.Comments.Add(comment);
+							}
+							break;
+						}
+
+					case "option":
+						{
+							if (dataTable.Options.Count == 0)
+								throw new Exception($"[TableGenerator][{dataTable.Name}] 옵션이 필드보다 먼저 선언되었습니다.");
+
+							var columnCount = columns.Length;
+							for (var x = 0; x < columnCount; ++x)
+							{
+								if (!includeFields.Contains(x))
+									continue;
+
+								var column = columns[x];
+								var option = column.ToLower();
+								//if (string.IsNullOrWhiteSpace(option))
+								//{
+								//	m_Logger.Log($"[TableGenerator][{dataTable.Name}] {x}열에 옵션이 비어있습니다.");
+								//}
+
+								dataTable.Options.Add(option);
+							}
+							break;
+						}
+
 					case "record":
 						{
 							if (dataTable.Fields.Count == 0 || dataTable.Types.Count == 0)
@@ -257,10 +309,11 @@ namespace Crockhead.Table
 									continue;
 
 								var column = columns[x];
+								var value = column;
 
-								// 문자열 쌍따옴표(")를 특수문자(\")로 변경.
-								column = column.Replace("\"", "\\\""); // "를 \\"로 변경.
-								column = column.Replace("\\\\\"", "\\\""); // \\"를 \"로 변경.
+								// 문자열 쌍따옴표(")가 존재할 경우 이를 특수문자(\")로 변경.
+								value = value.Replace("\"", "\\\""); // "를 \\"로 변경.
+								value = value.Replace("\\\\\"", "\\\""); // \\"를 \"로 변경.
 
 								//if (string.IsNullOrWhiteSpace(column))
 								//{
@@ -268,7 +321,7 @@ namespace Crockhead.Table
 								//	column = "";
 								//}
 
-								record.Add(column);
+								record.Add(value);
 							}
 
 							if (record.Count > 0)
@@ -287,6 +340,12 @@ namespace Crockhead.Table
 
 			if (dataTable.Types.Count == 0)
 				m_Logger.Log($"[TableGenerator][{dataTable.Name}] 타입 목록이 비어있습니다.");
+
+			//if (dataTable.Comments.Count == 0)
+			//	m_Logger.Log($"[TableGenerator][{dataTable.Name}] 코멘트 목록이 비어있습니다.");
+
+			//if (dataTable.Options.Count == 0)
+			//	m_Logger.Log($"[TableGenerator][{dataTable.Name}] 옵션 목록이 비어있습니다.");
 
 			if (dataTable.Records.Count == 0)
 				m_Logger.Log($"[TableGenerator][{dataTable.Name}] 레코드 목록이 비어있습니다.");
@@ -349,6 +408,21 @@ namespace Crockhead.Table
 		/// </summary>
 		public void CreateCSToFile(string csFilePath, DataTable dataTable)
 		{
+			CreateCSToFile(csFilePath, dataTable, new List<string>());
+		}
+
+		/// <summary>
+		/// CS 파일 생성.
+		/// </summary>
+		public void CreateCSToFile(string csFilePath, DataTable dataTable, List<string> namespaces)
+		{
+			if (string.IsNullOrWhiteSpace(csFilePath))
+				throw new ArgumentNullException(nameof(csFilePath));
+			if (dataTable == null)
+				throw new ArgumentNullException(nameof(dataTable));
+			if (namespaces == null)
+				throw new ArgumentNullException(nameof(namespaces));
+
 			var parentDirectory = Path.GetDirectoryName(csFilePath);
 			if (!Directory.Exists(parentDirectory))
 				Directory.CreateDirectory(parentDirectory);
@@ -369,7 +443,13 @@ namespace Crockhead.Table
 			m_StringBuilder.AppendLine("using Newtonsoft.Json;");
 			m_StringBuilder.AppendLine("using System;");
 			m_StringBuilder.AppendLine("using System.Collections.Generic;");
+			m_StringBuilder.AppendLine("using Crockhead");
 			m_StringBuilder.AppendLine("using Crockhead.Table;");
+			foreach (var @namespace in namespaces)
+			{
+				m_StringBuilder.AppendLine($"using {@namespace};");
+			}
+
 			m_StringBuilder.AppendLine();
 			m_StringBuilder.AppendLine();
 

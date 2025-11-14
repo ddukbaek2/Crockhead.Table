@@ -25,7 +25,7 @@
 		<ProjectUrl>$(PackageProjectUrl)</ProjectUrl>
 		<PackageDirectory>$(MSBuildProjectDirectory)\bin\$(Configuration)\</PackageDirectory>
 		<DeployOnBuild>True</DeployOnBuild>
-		<DistOnPack>True</DistOnPack>
+		<DistOnPack>False</DistOnPack>
 		<OutputDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\</OutputDir>
 		<LibraryFilePath>$(OutputDir)$(AssemblyName).dll</LibraryFilePath>
 		<DocumentFilePath>$(OutputDir)$(AssemblyName).xml</DocumentFilePath>

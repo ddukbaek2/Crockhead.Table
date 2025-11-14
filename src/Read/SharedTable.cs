@@ -2,7 +2,6 @@ using Crockhead.Core;
 using Crockhead.Logging;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 
 namespace Crockhead.Table
@@ -137,6 +136,14 @@ namespace Crockhead.Table
 		public void Load()
 		{
 			OnLoad(Reader);
+		}
+
+		/// <summary>
+		/// 레코드 포함 여부 반환.
+		/// </summary>
+		public bool Contains(int id)
+		{
+			return m_Collection.Contains(id);
 		}
 
 		/// <summary>

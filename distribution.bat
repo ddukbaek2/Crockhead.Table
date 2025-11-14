@@ -20,12 +20,12 @@ echo NUGET_API_URL: %NUGET_API_URL%
 echo NUGET_API_KEY: %NUGET_API_KEY%
 
 echo --------------------------------------------------------------------------------
-::for %%F in (%SOURCE_FILE_PATTERN%) do (
-::	set FILEPATH=%%F
-::	echo FILEPATH: !FILEPATH!
-::
-::	dotnet nuget push "!FILEPATH!" --api-key %NUGET_API_KEY% --source %NUGET_API_URL% --skip-duplicate --force-english-output
-::)
+for %%F in (%SOURCE_FILE_PATTERN%) do (
+	set FILEPATH=%%F
+	echo FILEPATH: !FILEPATH!
+
+	dotnet nuget push "!FILEPATH!" --api-key %NUGET_API_KEY% --source %NUGET_API_URL% --skip-duplicate --force-english-output
+)
 
 endlocal
 echo ================================================================================
