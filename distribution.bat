@@ -3,7 +3,7 @@ echo ===========================================================================
 echo distribution.bat
 setlocal enabledelayedexpansion
 set CURRENT_DIRECTORY=%cd%
-set SOURCE_DIRECTORY=%CURRENT_DIRECTORY%\bin\Release
+set SOURCE_DIRECTORY=%CURRENT_DIRECTORY%\bin\Distribution
 set SOURCE_FILE_PATTERN=%SOURCE_DIRECTORY%\*.nupkg
 set NUGET_API_URL=https://api.nuget.org/v3/index.json
 if exist "nugetapikey" (
