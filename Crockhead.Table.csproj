@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>0.0.1</Version>
+		<Version>0.0.3</Version>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<Nullable>disable</Nullable>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
@@ -25,16 +25,17 @@
 		<ProjectUrl>$(PackageProjectUrl)</ProjectUrl>
 		<PackageDirectory>$(MSBuildProjectDirectory)\bin\$(Configuration)\</PackageDirectory>
 		<DeployOnBuild>True</DeployOnBuild>
-		<DistOnPack>False</DistOnPack>
+		<DistOnPack>True</DistOnPack>
 		<OutputDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\</OutputDir>
 		<LibraryFilePath>$(OutputDir)$(AssemblyName).dll</LibraryFilePath>
 		<DocumentFilePath>$(OutputDir)$(AssemblyName).xml</DocumentFilePath>
+		<Configurations>Debug;Release;Distribution</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="README.md" Pack="true" PackagePath="\" />
 		<None Include="LICENSE" Pack="true" PackagePath="\" />
-		<PackageReference Include="Crockhead.Core" Version="0.0.13" />
+		<PackageReference Include="Crockhead.Core" Version="0.0.19" />
 		<PackageReference Include="ExcelDataReader" Version="3.8.0" />
 		<PackageReference Include="ExcelDataReader.DataSet" Version="3.8.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
@@ -48,10 +49,10 @@
 		<Delete Files="@(PackageFilePattern);@(SymbolPackageFilePattern)" />
 	</Target>
 
-	<Target Name="Deployment" AfterTargets="Build" Condition="'$(Configuration)'=='Release' and '$(DeployOnBuild)'=='True'">
+	<Target Name="Deployment" AfterTargets="Build" Condition="('$(Configuration)'=='Release' or '$(Configuration)'=='Distribution') and '$(DeployOnBuild)'=='True'">
 		<Exec Command="deployment.bat $(DocumentFilePath) $(LibraryFilePath)" WorkingDirectory="$(ProjectDir)" />
 	</Target>
-	<Target Name="Distribution" AfterTargets="Pack" Condition="'$(Configuration)'=='Release' and '$(DistOnPack)'=='True'">
+	<Target Name="Distribution" AfterTargets="Pack" Condition="'$(Configuration)'=='Distribution' and '$(DistOnPack)'=='True'">
 		<Exec Command="distribution.bat" WorkingDirectory="$(ProjectDir)" />
 	</Target>
 

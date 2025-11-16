@@ -252,7 +252,7 @@ namespace Crockhead.Table
 
 					case "comment":
 						{
-							if (dataTable.Comments.Count == 0)
+							if (dataTable.Fields.Count == 0)
 								throw new Exception($"[TableGenerator][{dataTable.Name}] 코멘트가 필드보다 먼저 선언되었습니다.");
 
 							var columnCount = columns.Length;
@@ -275,7 +275,7 @@ namespace Crockhead.Table
 
 					case "option":
 						{
-							if (dataTable.Options.Count == 0)
+							if (dataTable.Fields.Count == 0)
 								throw new Exception($"[TableGenerator][{dataTable.Name}] 옵션이 필드보다 먼저 선언되었습니다.");
 
 							var columnCount = columns.Length;
@@ -440,11 +440,11 @@ namespace Crockhead.Table
 			m_StringBuilder.AppendLine("//------------------------------------------------------------------------------");
 			//m_StringBuilder.AppendLine();
 
+			m_StringBuilder.AppendLine("using Crockhead;");
+			m_StringBuilder.AppendLine("using Crockhead.Table;");
 			m_StringBuilder.AppendLine("using Newtonsoft.Json;");
 			m_StringBuilder.AppendLine("using System;");
 			m_StringBuilder.AppendLine("using System.Collections.Generic;");
-			m_StringBuilder.AppendLine("using Crockhead");
-			m_StringBuilder.AppendLine("using Crockhead.Table;");
 			foreach (var @namespace in namespaces)
 			{
 				m_StringBuilder.AppendLine($"using {@namespace};");
