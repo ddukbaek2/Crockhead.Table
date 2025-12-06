@@ -28,9 +28,15 @@ namespace Crockhead.Table
 		/// <summary>
 		/// 생성됨.
 		/// </summary>
-		public Table(IEnumerable<TRecordable> records = null) : base()
+		public Table() : base()
 		{
-			m_Records = new SortedDictionary<int, TRecordable>();
+		}
+
+		/// <summary>
+		/// 생성됨.
+		/// </summary>
+		public Table(IEnumerable<TRecordable> records = null) : this()
+		{
 			AddRange(records);
 		}
 
@@ -273,14 +279,14 @@ namespace Crockhead.Table
 			return m_Records.Values.GetEnumerator();
 		}
 
-		/// <summary>
-		/// 생성.
-		/// </summary>
-		public static Table<TRecordable> Create(TRecordable[] records = null)
-		{
-			var obj = Reflections.CreateInstance<Table<TRecordable>>();
-			obj.AddRange(records);
-			return obj;
-		}
+		///// <summary>
+		///// 생성.
+		///// </summary>
+		//public static Table<TRecordable> Create(TRecordable[] records = null)
+		//{
+		//	var obj = Reflections.CreateInstance<Table<TRecordable>>();
+		//	obj.AddRange(records);
+		//	return obj;
+		//}
 	}
 }

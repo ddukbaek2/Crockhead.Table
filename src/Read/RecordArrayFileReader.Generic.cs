@@ -3,12 +3,13 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 
 namespace Crockhead.Table
 {
 	/// <summary>
-	/// 레코드 배열 파일 리더.
+	/// 레코드 배열 파일 로더.
 	/// </summary>
 	public class RecordArrayFileReader<TRecordable> : Disposable, IRecordArrayReader<TRecordable> where TRecordable : IRecordable
 	{
@@ -25,7 +26,7 @@ namespace Crockhead.Table
 		/// <summary>
 		/// 읽어들인 레코드 목록 프로퍼티.
 		/// </summary>
-		public TRecordable[] Records => m_Records.ToArray();
+		public IEnumerable<TRecordable> Records => m_Records;
 
 		/// <summary>
 		/// 생성됨.
@@ -95,37 +96,81 @@ namespace Crockhead.Table
 		}
 
 		/// <summary>
-		/// 읽기.
+		/// 불러오기.
 		/// </summary>
-		public Operation<TRecordable[]> Read()
+		public IEnumerable<TRecordable> Read()
 		{
-			void OnOperation(Operation<TRecordable[]> operation)
+			try
 			{
-				try
+				var json = File.ReadAllText(m_FilePath);
+				var records = JsonConvert.DeserializeObject<TRecordable[]>(json);
+				m_Records.Clear();
+				if (records != null && records.Length > 0)
+					m_Records.AddRange(records);
+				return m_Records;
+			}
+			catch
+			{
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// 불러오기. (비동기)
+		/// </summary>
+		public async Task<IEnumerable<TRecordable>> ReadAsync()
+		{
+			try
+			{				
+				return await Task.Run(async () =>
 				{
-					var json = File.ReadAllText(m_FilePath);
+					var json = await File.ReadAllTextAsync(m_FilePath);
 					var records = JsonConvert.DeserializeObject<TRecordable[]>(json);
 					m_Records.Clear();
 					if (records != null && records.Length > 0)
 						m_Records.AddRange(records);
-					operation.Success(Records);
-
-				}
-				catch (OperationCanceledException)
-				{
-					operation.Cancel();
-				}
-				catch (Exception exception)
-				{
-					//Debug.LogError($"[RecordArrayReader] '{assetPath}' JSON File Load Failed.");
-					operation.Fail(exception);
-					throw;
-				}
+					return m_Records;
+				});
 			}
-
-			var operation = new Operation<TRecordable[]>(OnOperation);
-			operation.Start();
-			return operation;
+			catch
+			{
+				throw;
+			}
 		}
+
+
+		///// <summary>
+		///// 불러오기.
+		///// </summary>
+		//public Operation<TRecordable[]> Read()
+		//{
+		//	void OnOperation(Operation<TRecordable[]> operation)
+		//	{
+		//		try
+		//		{
+		//			var json = File.ReadAllText(m_FilePath);
+		//			var records = JsonConvert.DeserializeObject<TRecordable[]>(json);
+		//			m_Records.Clear();
+		//			if (records != null && records.Length > 0)
+		//				m_Records.AddRange(records);
+		//			operation.Success(Records);
+
+		//		}
+		//		catch (OperationCanceledException)
+		//		{
+		//			operation.Cancel();
+		//		}
+		//		catch (Exception exception)
+		//		{
+		//			//Debug.LogError($"[RecordArrayReader] '{assetPath}' JSON File Read Failed.");
+		//			operation.Fail(exception);
+		//			throw;
+		//		}
+		//	}
+
+		//	var operation = new Operation<TRecordable[]>(OnOperation);
+		//	operation.Start();
+		//	return operation;
+		//}
 	}
 }

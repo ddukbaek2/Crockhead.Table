@@ -6,26 +6,25 @@ using Crockhead.Table;
 /// 샘플 테이블.
 /// </summary>
 [FilePath("Assets/Resources/Table/ExampleTable.json")]
-public class ExampleTable : SharedTable<ExampleTable, ExampleTableRecord, RecordArrayFileReader<ExampleTableRecord>>
+public class ExampleTable : SharedTable<ExampleTable, ExampleTableRecord>
 {
 	/// <summary>
 	/// 생성.
 	/// </summary>
-	protected override void OnCreate(params object[] arguments)
+	protected override void OnCreate()
 	{
-		base.OnCreate(arguments);
+		base.OnCreate();
 
 		// 파일로부터 레코드 배열을 읽어오는 리더.
 		var reader = new RecordArrayFileReader<ExampleTableRecord>(this);
-		//SetReader(reader);
-		Load(reader);
+		LoadTable(reader);
 	}
 
 	/// <summary>
 	/// 해제됨.
 	/// </summary>
-	protected override void OnDispose(bool explicitDisposing)
+	protected override void OnDispose()
 	{
-		base.OnDispose(explicitDisposing);
+		base.OnDispose();
 	}
 }

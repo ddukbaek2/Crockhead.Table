@@ -35,9 +35,7 @@
 	<ItemGroup>
 		<None Include="README.md" Pack="true" PackagePath="\" />
 		<None Include="LICENSE" Pack="true" PackagePath="\" />
-		<PackageReference Include="Crockhead.Core" Version="0.0.19" />
-		<PackageReference Include="ExcelDataReader" Version="3.8.0" />
-		<PackageReference Include="ExcelDataReader.DataSet" Version="3.8.0" />
+		<PackageReference Include="Crockhead.Core" Version="0.0.24" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 

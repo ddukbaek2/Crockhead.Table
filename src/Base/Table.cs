@@ -38,6 +38,15 @@ namespace Crockhead.Table
 		}
 
 		/// <summary>
+		/// 생성됨.
+		/// </summary>
+		public Table(IEnumerable<IRecordable> records) : this()
+		{
+			AddRange(records);
+		}
+
+
+		/// <summary>
 		/// 해제됨.
 		/// </summary>
 		protected override void OnDispose(bool explicitDisposing)
@@ -169,14 +178,14 @@ namespace Crockhead.Table
 			return m_Records.Values.GetEnumerator();
 		}
 
-		/// <summary>
-		/// 생성.
-		/// </summary>
-		public static Table Create(IRecordable[] records = null)
-		{
-			var obj = Reflections.CreateInstance<Table>();
-			obj.AddRange(records);
-			return obj;
-		}
+		///// <summary>
+		///// 생성.
+		///// </summary>
+		//public static Table Create(IRecordable[] records = null)
+		//{
+		//	var obj = Reflections.CreateInstance<Table>();
+		//	obj.AddRange(records);
+		//	return obj;
+		//}
 	}
 }
