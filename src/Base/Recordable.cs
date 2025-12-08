@@ -10,8 +10,14 @@ namespace Crockhead.Table
 	/// <para>IRecordable 인터페이스 구현체.</para>
 	/// </summary>
 	[JsonObject(MemberSerialization.OptIn)]
-	public class Record : IRecordable
+	public class Recordable : IRecordable
 	{
+		/// <summary>
+		/// 필드 배열 프로퍼티.
+		/// </summary>
+		[JsonIgnore]
+		public virtual string[] Fields { get; } = new string[] { "Id" };
+
 		/// <summary>
 		/// 고유 식별자 프로퍼티.
 		/// </summary>
@@ -23,7 +29,7 @@ namespace Crockhead.Table
 		/// </summary>
 		int IRecordable.GetFieldCount()
 		{
-			return 1;
+			return Fields.Length;
 		}
 
 		/// <summary>
@@ -31,11 +37,12 @@ namespace Crockhead.Table
 		/// </summary>
 		string IRecordable.GetFieldName(int index)
 		{
-			switch (index)
+			if (index < Fields.Length)
 			{
-				case 0: return "Id";
-				default: return null;
+				return Fields[index];
 			}
+
+			return string.Empty;
 		}
 
 		/// <summary>
@@ -43,11 +50,12 @@ namespace Crockhead.Table
 		/// </summary>
 		Type IRecordable.GetFieldType(int index)
 		{
-			switch (index)
+			if (index < Fields.Length)
 			{
-				case 0: return Id.GetType();
-				default: return null;
+				return Fields[index].GetType();
 			}
+
+			return null;
 		}
 
 		/// <summary>
@@ -55,11 +63,12 @@ namespace Crockhead.Table
 		/// </summary>
 		object IRecordable.GetFieldValue(int index)
 		{
-			switch (index)
+			if (index < Fields.Length)
 			{
-				case 0: return Id;
-				default: return null;
+				return Fields[index];
 			}
+
+			return null;
 		}
 	}
 }

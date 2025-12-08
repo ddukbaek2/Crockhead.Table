@@ -10,7 +10,7 @@ namespace Crockhead.Table
 	/// 테이블.
 	/// <para>기록 객체를 보관하는 컬렉션.</para>
 	/// <para>모든 레코드는 동일 컬렉션안에서 정수형 고유식별자를 들고 있으며 해당 레코드의 고유식별자를 키로 사용.</para>
-	/// <para>IEnumerable.Record 인터페이스 구현체.</para>
+	/// <para>IEnumerable.Recordable 인터페이스 구현체.</para>
 	/// </summary>
 	public class Table : Disposable, ITable, IEnumerable<IRecordable>
 	{
@@ -162,7 +162,7 @@ namespace Crockhead.Table
 
 		/// <summary>
 		/// 열거 제공자 반환.
-		/// <para>IEnumerable.Record 인터페이스 구현.</para>
+		/// <para>IEnumerable.Recordable 인터페이스 구현.</para>
 		/// </summary>
 		IEnumerator<IRecordable> IEnumerable<IRecordable>.GetEnumerator()
 		{
