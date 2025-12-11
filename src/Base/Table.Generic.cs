@@ -30,6 +30,7 @@ namespace Crockhead.Table
 		/// </summary>
 		public Table() : base()
 		{
+			m_Records = new SortedDictionary<int, TRecordable>();
 		}
 
 		/// <summary>
